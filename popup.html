@@ -240,6 +240,24 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    .privacy-options {
+  padding-left: 24px;
+  margin-top: 8px;
+}
+
+.blur-messages .copyable-text {
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+}
+
+.blur-messages .copyable-text:hover {
+  filter: blur(0);
+}
+
+.hide-messages .copyable-text {
+  display: none;
+}
   </style>
 </head>
 <body>
@@ -250,6 +268,38 @@
   
 
   <div class="container">
+    <div class="settings-card">
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Privacy Controls
+      </div>
+      <div class="setting-row">
+        <label>
+          <input type="checkbox" id="privacyMode">
+          Enable Privacy Mode
+        </label>
+      </div>
+      <div class="privacy-options" style="display: none;">
+        <div class="setting-row">
+          <label>
+            <input type="radio" name="privacyAction" value="blur" checked>
+            Blur Messages
+          </label>
+        </div>
+        <div class="setting-row">
+          <label>
+            <input type="radio" name="privacyAction" value="hide">
+            Hide Messages
+          </label>
+        </div>
+      </div>
+    </div>
+
+
+
     <div class="settings-card">
       <div class="card-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -1,3 +1,20 @@
+async function ensureContentScriptLoaded(tab) {
+  try {
+    const response = await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
+    console.log('Content script response:', response);
+    return true;
+  } catch (e) {
+    console.log('Content script not loaded, injecting...', e);
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content.js']
+    });
+    // Wait a bit for the script to initialize
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return true;
+  }
+}
+
 // Helper functions for different export formats
 function formatMessagesAsCSV(messages, options) {
   const headers = ['Message'];
@@ -213,6 +230,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         statusDiv.textContent = 'Stopping scrape...';
       }
     });
+  }); 
+
+
+  const privacyModeToggle = document.getElementById('privacyMode');
+  const privacyOptions = document.querySelector('.privacy-options');
+
+  // Function to update privacy mode
+  async function updatePrivacyMode() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (!tab.url.includes('web.whatsapp.com')) {
+      console.log('Not on WhatsApp Web');
+      return;
+    }
+
+    const enabled = privacyModeToggle.checked;
+    const action = document.querySelector('input[name="privacyAction"]:checked').value;
+    
+    console.log('Updating privacy mode:', { enabled, action });
+    
+    // Ensure content script is loaded
+    await ensureContentScriptLoaded(tab);
+
+    // Update UI
+    privacyOptions.style.display = enabled ? 'block' : 'none';
+    
+    // Save settings
+    await chrome.storage.sync.set({
+      privacyMode: enabled,
+      privacyAction: action
+    });
+    
+    // Send message to content script
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'togglePrivacy',
+        enabled,
+        privacyAction: action
+      });
+      console.log('Privacy mode update response:', response);
+    } catch (error) {
+      console.error('Error updating privacy mode:', error);
+    }
+  }
+
+  // Load saved privacy settings
+  const settings = await chrome.storage.sync.get({
+    privacyMode: false,
+    privacyAction: 'blur'
+  });
+
+  privacyModeToggle.checked = settings.privacyMode;
+  document.querySelector(`input[name="privacyAction"][value="${settings.privacyAction}"]`).checked = true;
+  privacyOptions.style.display = settings.privacyMode ? 'block' : 'none';
+
+  // Apply initial privacy settings
+  if (settings.privacyMode) {
+    await updatePrivacyMode();
+  }
+
+  // Event listeners for privacy controls
+  privacyModeToggle.addEventListener('change', updatePrivacyMode);
+  
+  document.querySelectorAll('input[name="privacyAction"]').forEach(radio => {
+    radio.addEventListener('change', updatePrivacyMode);
   });
 
   // Initialize
