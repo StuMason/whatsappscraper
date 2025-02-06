@@ -2,6 +2,88 @@
 let isInitialized = false;
 let shouldStop = false;
 let batchSize = 10; // Default batch size
+// Add these at the top of content.js with other variables
+let privacyStyleSheet = null;
+
+// Add this function to handle style injection
+// Update the injectPrivacyStyles function in content.js
+
+function injectPrivacyStyles() {
+  if (privacyStyleSheet) return;
+  
+  privacyStyleSheet = document.createElement('style');
+  privacyStyleSheet.textContent = `
+    /* Text messages */
+    .blur-messages .copyable-text {
+      filter: blur(5px) !important;
+      transition: filter 0.3s ease !important;
+    }
+    
+    .blur-messages .copyable-text:hover {
+      filter: blur(0) !important;
+    }
+    
+    /* Images and media */
+    .blur-messages img,
+    .blur-messages video,
+    .blur-messages ._1VwCy, /* WhatsApp image container */
+    .blur-messages ._2HE1Z, /* Media thumbnails */
+    .blur-messages .p357zi0d, /* Document thumbnails */
+    .blur-messages ._1xXj6, /* Link previews */
+    .blur-messages [data-testid="image-thumb"] {
+      filter: blur(12px) !important;
+      transition: filter 0.3s ease !important;
+    }
+    
+    .blur-messages img:hover,
+    .blur-messages video:hover,
+    .blur-messages ._1VwCy:hover,
+    .blur-messages ._2HE1Z:hover,
+    .blur-messages .p357zi0d:hover,
+    .blur-messages ._1xXj6:hover,
+    .blur-messages [data-testid="image-thumb"]:hover {
+      filter: blur(0) !important;
+    }
+    
+    /* Hide mode */
+    .hide-messages .copyable-text,
+    .hide-messages img,
+    .hide-messages video,
+    .hide-messages ._1VwCy,
+    .hide-messages ._2HE1Z,
+    .hide-messages .p357zi0d,
+    .hide-messages ._1xXj6,
+    .hide-messages [data-testid="image-thumb"] {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(privacyStyleSheet);
+}
+
+function togglePrivacyMode(enabled, action = 'blur') {
+  // Ensure styles are injected
+  injectPrivacyStyles();
+  
+  // Find the main chat container - using multiple possible selectors
+  const chatContainer = document.querySelector('[data-tab="8"]') || 
+                       document.querySelector('#main') ||
+                       document.querySelector('.app-wrapper-web');
+                       
+  if (!chatContainer) {
+    console.error('Chat container not found');
+    return;
+  }
+  
+  console.log('Toggling privacy mode:', { enabled, action });
+  
+  // Remove existing privacy classes
+  chatContainer.classList.remove('blur-messages', 'hide-messages');
+  
+  // Add new class based on selected action
+  if (enabled) {
+    chatContainer.classList.add(`${action}-messages`);
+  }
+}
 
 // Initialize message listeners
 function initialize() {
@@ -14,6 +96,14 @@ function initialize() {
       sendResponse({ status: 'ok' });
       return;
     }
+
+
+// Add this to your message listener in initialize()
+if (request.action === 'togglePrivacy') {
+  togglePrivacyMode(request.enabled, request.privacyAction);
+  sendResponse({ status: 'ok' });
+  return;
+}
     
     if (request.action === 'startScraping') {
       shouldStop = false;
@@ -35,6 +125,15 @@ function initialize() {
       console.log('Stopping scrape...');
       shouldStop = true;
       sendResponse({ status: 'stopping' });
+    }
+  });
+
+  chrome.storage.sync.get({
+    privacyMode: false,
+    privacyAction: 'blur'
+  }, (settings) => {
+    if (settings.privacyMode) {
+      togglePrivacyMode(true, settings.privacyAction);
     }
   });
 

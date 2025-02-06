@@ -2,76 +2,371 @@
 <html>
 <head>
   <style>
+    :root {
+      --whatsapp-teal: #25D366;
+      --whatsapp-teal-dark: #128C7E;
+      --whatsapp-light-bg: #DCF8C6;
+      --text-primary: #075E54;
+    }
+
     body {
-      width: 300px;
-      padding: 16px;
+      width: 320px;
+      padding: 0;
+      margin: 0;
       font-family: system-ui, -apple-system, sans-serif;
+      background: #fff;
+      color: var(--text-primary);
     }
+
+    .header {
+      background: linear-gradient(135deg, var(--whatsapp-teal-dark), var(--whatsapp-teal));
+      padding: 20px;
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+      animation: shine 3s infinite;
+      background-size: 200% 200%;
+    }
+
+    @keyframes shine {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin: 4px 0 0 0;
+    }
+
     .container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      padding: 16px;
     }
-    .batch-size {
+
+    .settings-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .settings-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 12px 0;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .batch-size input {
-      width: 80px;
-    }
-    .buttons {
+
+    .setting-row {
       display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .setting-row:hover {
+      background: #f0f2f5;
+    }
+
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      border: 2px solid var(--whatsapp-teal);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--whatsapp-teal-dark);
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+    }
+
+    .export-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
-    button {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+
+    .format-option {
+      position: relative;
     }
-    #startScraping {
-      background: #0284c7;
+
+    .format-option input[type="radio"] {
+      display: none;
+    }
+
+    .format-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: #f0f2f5;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .format-option input[type="radio"]:checked + label {
+      background: var(--whatsapp-teal);
       color: white;
     }
-    #startScraping:disabled {
-      background: #94a3b8;
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
     }
+
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #startScraping {
+      background: var(--whatsapp-teal);
+      color: white;
+    }
+
+    #startScraping:hover:not(:disabled) {
+      background: var(--whatsapp-teal-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+    }
+
+    #startScraping:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
     #stopScraping {
       background: #ef4444;
       color: white;
     }
+
+    #stopScraping:hover:not(:disabled) {
+      background: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
+
     #stopScraping:disabled {
       background: #fca5a5;
+      cursor: not-allowed;
     }
-    #status {
-      font-size: 14px;
-      color: #475569;
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      background: #f8f9fa;
+      font-size: 13px;
     }
+
+    .status.running {
+      background: var(--whatsapp-light-bg);
+      color: var(--whatsapp-teal-dark);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--whatsapp-teal);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    .running .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .privacy-options {
+  padding-left: 24px;
+  margin-top: 8px;
+}
+
+.blur-messages .copyable-text {
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+}
+
+.blur-messages .copyable-text:hover {
+  filter: blur(0);
+}
+
+.hide-messages .copyable-text {
+  display: none;
+}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="batch-size">
-      <label for="batchSize">Batch Size:</label>
-      <input 
-        type="number" 
-        id="batchSize" 
-        min="1" 
-        max="100" 
-        value="10"
-      >
-    </div>
-    
-    <div class="buttons">
-      <button id="startScraping">Start Scraping</button>
-      <button id="stopScraping">Stop</button>
-    </div>
-
-    <div id="status">Ready to scrape...</div>
+  <div class="header">
+    <h1 class="title">WAScraper Pro</h1>
+    <p class="subtitle">Professional Chat Tool</p>
   </div>
   
+
+  <div class="container">
+    <div class="settings-card">
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Privacy Controls
+      </div>
+      <div class="setting-row">
+        <label>
+          <input type="checkbox" id="privacyMode">
+          Enable Privacy Mode
+        </label>
+      </div>
+      <div class="privacy-options" style="display: none;">
+        <div class="setting-row">
+          <label>
+            <input type="radio" name="privacyAction" value="blur" checked>
+            Blur Messages
+          </label>
+        </div>
+        <div class="setting-row">
+          <label>
+            <input type="radio" name="privacyAction" value="hide">
+            Hide Messages
+          </label>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="settings-card">
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+        </svg>
+        Scraping Settings
+      </div>
+      <div class="setting-row">
+        <label for="batchSize">Batch Size:</label>
+        <input type="number" id="batchSize" min="1" max="100" value="10">
+      </div>
+      <div class="setting-row">
+        <label>
+          <input type="checkbox" id="includeTimestamps" checked>
+          Include timestamps
+        </label>
+      </div>
+      <div class="setting-row">
+        <label>
+          <input type="checkbox" id="includeSenderInfo" checked>
+          Include sender information
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export Format
+      </div>
+      <div class="export-options">
+        <div class="format-option">
+          <input type="radio" id="formatJson" name="exportFormat" value="json" checked>
+          <label for="formatJson">JSON</label>
+        </div>
+        <div class="format-option">
+          <input type="radio" id="formatCsv" name="exportFormat" value="csv">
+          <label for="formatCsv">CSV</label>
+        </div>
+        <div class="format-option">
+          <input type="radio" id="formatTxt" name="exportFormat" value="txt">
+          <label for="formatTxt">Text</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button id="startScraping">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l3.293 3.293a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.414 0L2 14.5M21 21l-3.293-3.293a1 1 0 0 1 0-1.414l9.9-9.9a1 1 0 0 1 1.414 0L32 9.5"/>
+        </svg>
+        Start Scraping
+      </button>
+      <button id="stopScraping" disabled>Stop</button>
+    </div>
+
+    <div class="status">
+      <div class="spinner"></div>
+      <span id="status">Ready to scrape...</span>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>
